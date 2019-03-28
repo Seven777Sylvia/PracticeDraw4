@@ -10,12 +10,16 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.hencoder.hencoderpracticedraw4.R;
 
 public class Practice14FlipboardView extends View {
+
+    private final String TAG = Practice14FlipboardView.class.getSimpleName();
+
     Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     Bitmap bitmap;
     Camera camera = new Camera();
@@ -50,6 +54,11 @@ public class Practice14FlipboardView extends View {
     }
 
     @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         animator.end();
@@ -72,9 +81,22 @@ public class Practice14FlipboardView extends View {
         int x = centerX - bitmapWidth / 2;
         int y = centerY - bitmapHeight / 2;
 
+        //先画上面
         canvas.save();
+        canvas.clipRect(x, y, x + bitmapWidth, centerY);
+        canvas.drawBitmap(bitmap, x, y, paint);
+        canvas.restore();
 
+
+        //再画下面
+        canvas.save();
         camera.save();
+        if (degree < 90) {
+            canvas.clipRect(0, centerY, getWidth(), getHeight());
+        } else {
+            canvas.clipRect(0, 0, getWidth(), centerY);
+        }
+
         camera.rotateX(degree);
         canvas.translate(centerX, centerY);
         camera.applyToCanvas(canvas);
@@ -83,5 +105,9 @@ public class Practice14FlipboardView extends View {
 
         canvas.drawBitmap(bitmap, x, y, paint);
         canvas.restore();
+        Log.i(TAG, "onDraw() -> count: " + count++);
+
     }
+
+    int count = 0;
 }
